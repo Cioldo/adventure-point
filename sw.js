@@ -1,8 +1,8 @@
 // Adventure Point service worker: the page works offline after the first visit.
 // Page: network first (so updates show up), images and icons: cache first, fonts/libraries: stale-while-revalidate.
-const VERSION = 'ap-v4';
+const VERSION = 'ap-v5';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
-  ...['arcticescape','bybowling','fjellheisen','hero','ishavskatedralen','kajakk','kino','mack','nnkm','nordlys','polaria',
+  ...['arcticescape','bybowling','fjellheisen','hero','ishavskatedralen','kajakk','kino','mack','nnkm','nordlys','padling','polaria',
       'polarmuseet','prestvannet','sherpatrappa','tromsobadet','villmark','vitensenter'].map(n => `./img/${n}.jpg`)];
 const SWR_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com'];
 

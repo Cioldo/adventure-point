@@ -310,6 +310,35 @@ h1,h2,h3{margin:0;text-wrap:balance}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:370px){.f-grid{grid-template-columns:1fr 1fr}.f-grid .field:first-child{grid-column:1/-1}.steps{grid-template-columns:1fr}}
 
+/* off-peak pricing + business mode */
+.pts-pill svg{width:14px;height:14px}
+.card .meta{right:44px;overflow:hidden}
+.card .meta .tag{flex:none}
+.slot small.lv-rolig{color:var(--good)}
+.slot small.lv-travelt{color:var(--warn)}
+.offpeak,.chart-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.op-head{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.op-head span{font-size:12px;color:var(--good);font-weight:700;display:flex;gap:4px;align-items:center}
+.op-head svg{width:14px;height:14px}
+.obars{display:flex;gap:5px;align-items:flex-end;height:120px}
+.ob{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px;min-width:0}
+.ob i{display:block;width:100%;border-radius:6px 6px 2px 2px;background:var(--warn);min-height:4px}
+.ob i.lv-rolig{background:var(--good)}
+.ob i.lv-middels{background:var(--gold)}
+.ob small{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ob .v{font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpis .fact b{font-size:19px}
+.heat{display:grid;gap:4px;align-items:center}
+.heat small{font-size:11px;color:var(--muted);text-align:center}
+.hc{height:30px;border-radius:6px;display:grid;place-items:center;font-size:10.5px;font-weight:800;color:#04261a}
+.hc.lv-rolig{background:var(--good)}
+.hc.lv-middels{background:var(--gold);color:#2d1d00}
+.hc.lv-travelt{background:rgba(255,138,101,.3)}
+input.wide{width:100%;accent-color:var(--sky)}
+.biz-av{background:linear-gradient(135deg,#3d9bff,#38d39f)!important;color:#06162f!important}
+.cust-av{width:42px;height:42px;flex:none;background:var(--surface-2);color:var(--ink)}
+
 /* desktop: intro on the left, the app in a phone frame on the right */
 @media (min-width:980px) and (min-height:680px){
   body{display:grid;grid-template-columns:minmax(0,460px) 412px;justify-content:center;align-items:center;gap:72px;padding-inline:40px;
@@ -349,6 +378,7 @@ h1,h2,h3{margin:0;text-wrap:balance}
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>16 ekte steder i Tromsø, fra Fjellheisen til Prestvannet, med pris, adresse og kart.</li>
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v8h14v-8M12 8v13"/></svg>Sjekk inn med QR-kode og få poeng du kan bruke hos partnerne.</li>
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Kan legges til på hjemskjermen og brukes som en vanlig app.</li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Billigere i poeng når det er rolig. Bedriftene styrer rabatten selv fra bedriftskontoen.</li>
   </ul>
   <div class="qr-box"><div id="qr" aria-label="QR-kode til denne siden"></div><div><b>Åpne på mobilen</b><span>Skann koden med kameraet. Du kan prøve appen med testkontoen «Thomas Testesen».</span></div></div>
   <p class="fine">Klikkbar demo fra et studentprosjekt i BED-2015 Kommersialisering ved UiT, våren 2022. Stedene, prisene og adressene er ekte. Poeng, testkonto og partnerskap er oppdiktet, og ingen booking blir sendt. <a href="https://github.com/Cioldo/adventure-point" target="_blank" rel="noopener">Om prosjektet</a></p>
@@ -364,8 +394,7 @@ h1,h2,h3{margin:0;text-wrap:balance}
       </div>
     </div>
     <div class="spacer"></div>
-    <button class="pts-pill" data-act="tab" data-tab="poeng" aria-label="Dine poeng"><span class="coin"></span><span id="ptsTop">0</span> poeng</button>
-    <button class="avatar" data-act="tab" data-tab="profil" aria-label="Profil">T</button>
+    <div id="topRight" style="display:flex;align-items:center;gap:12px"></div>
   </header>
   <main id="view"></main>
   <nav class="tabs" id="tabs" aria-label="Hovedmeny"></nav>
@@ -486,9 +515,15 @@ const ACTS = [
     src:null, priceNote:'Gratis turområde.',
     desc:'Vann på toppen av Tromsøya med tursti rundt, fugleliv og skiløyper om vinteren.'},
 ];
+// Fictional test company, used for the business account. Clearly marked as made up wherever it shows.
+ACTS.push({id:'padling', name:'Kveldspadling i sundet', place:'Telegrafbukta', addr:'Telegrafbukta, sør på Tromsøya', cat:'Natur', price:690, earn:70, redeem:860, level:3, test:true,
+  icon:'kayak', a:'#0f5d8c', b:'#38d39f', times:['10:00','12:00','14:00','16:00','18:00','20:00'], dur:'2 t', isNew:true, src:null,
+  priceNote:'Testbedrift laget for demoen. Nordlys Padling AS finnes ikke, så turen kan ikke bookes på ekte.',
+  desc:'Guidet padletur langs Tromsøya med utsikt mot Kvaløya. Kajakk, tørrdrakt og kort opplæring er med. Drives av testbedriften Nordlys Padling AS.'});
 const byId = id => ACTS.find(a => a.id === id);
 const CREDITS = {"arcticescape": ["SparkFun Electronics from Boulder, USA", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Conundrum_Escape_Room.jpg"], "bybowling": ["TenPinGeek", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:AMF_bowling_center.jpg"], "fjellheisen": ["David Stanley from Nanaimo, Canada", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Tromso_Gondola_(52609122312).jpg"], "hero": ["kallerna", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Tromssa_Storsteinen_1.jpg"], "ishavskatedralen": ["Godot13", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:NOR-2016-Troms%C3%B8-Arctic_Cathedral_(Ishavskatedralen)_01_front.jpg"], "kajakk": ["Peulle", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Steingarden_fra_Sommar%C3%B8y.JPG"], "kino": ["Mojmir Churavy", "CC0", "https://commons.wikimedia.org/wiki/File:Kino_Atlas_Interier_J.jpg"], "mack": ["scott1346 from Mechanicsville, MD, USA", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Olhallen_microbrewery_(32744619674).jpg"], "nnkm": ["Evgenii Salganik", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Nordnorsk_Kunstmuseum_Troms%C3%B8.jpg"], "nordlys": ["Alshemal Norway", "CC BY 4.0", "https://commons.wikimedia.org/wiki/File:Aurora_borealis_substorm_at_Brosmetinden_Kval%C3%B8ya_Troms%C3%B8_by_Alshemal_Norway_(September_2025).jpg"], "polaria": ["Bjoertvedt", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Polaria_01.JPG"], "polarmuseet": ["Visem", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Polar_Museum_in_Troms%C3%B8_(Jul_2019)_1.jpg"], "prestvannet": ["Leonhard Lenz", "CC0", "https://commons.wikimedia.org/wiki/File:Prestvannet_Troms%C3%B8_2022-09-06_08.jpg"], "sherpatrappa": ["David Stanley from Nanaimo, Canada", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Sherpatrappa_(52609404729).jpg"], "tromsobadet": ["H@r@ld", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Tromsobadet_2020.jpg"], "villmark": ["Frank Kovalchek from USA", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Dog_team_pounding_through_a_snow_storm_(6953033057).jpg"], "vitensenter": ["Leonhard Lenz", "CC0", "https://commons.wikimedia.org/wiki/File:Nordlysplanetariet_Universitetet_i_Troms%C3%B8_2022-09-06_03.jpg"]};
-const ILLUS = new Set(['bybowling','arcticescape','kino','villmark']);
+const ILLUS = new Set(['bybowling','arcticescape','kino','villmark','padling']);
+CREDITS.padling = CREDITS.kajakk;
 const OPEN = {polaria:[10,17], polarmuseet:[11,18], nnkm:[11,17]};
 const photo = (key, cls='') => `<div class="photo ${cls}" style="background-image:url('img/${key}.jpg')"></div>`;
 function credit(key){
@@ -509,13 +544,62 @@ function greeting(){ const h = new Date().getHours(); return h<5 ? 'God natt' : 
 const COORDS = {fjellheisen:[69.63852,18.99084], polaria:[69.64368,18.9499], polarmuseet:[69.65221,18.96332], ishavskatedralen:[69.64803,18.98742],
   vitensenter:[69.67896,18.97147], mack:[69.64592,18.95048], nnkm:[69.64833,18.95956], tromsobadet:[69.67465,18.95423], bybowling:[69.64948,18.95548],
   arcticescape:[69.64877,18.9539], kino:[69.65072,18.95469], nordlys:[69.64797,18.95967], kajakk:[69.63352,18.0073], villmark:[69.62304,18.76595],
-  sherpatrappa:[69.63943,18.99873], prestvannet:[69.65921,18.93491]};
+  sherpatrappa:[69.63943,18.99873], prestvannet:[69.65921,18.93491], padling:[69.6302,18.9186]};
 ACTS.forEach(a => { [a.lat, a.lon] = COORDS[a.id]; });
 const USER = {lat:69.65136, lon:18.9586, label:'Stortorget'};
 const dist = a => { const R = 6371, r = Math.PI/180, dLa = (a.lat-USER.lat)*r, dLo = (a.lon-USER.lon)*r;
   const h = Math.sin(dLa/2)**2 + Math.cos(USER.lat*r)*Math.cos(a.lat*r)*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); };
 const kmTxt = a => { const d = dist(a); return d < 1 ? Math.round(d*1000/10)*10 + ' m' : d.toFixed(1).replace('.',',') + ' km'; };
 let MAP = null, MARKERS = {};
+
+/* ---------- visitor forecast and off-peak point prices (made-up model for the demo) ----------
+   busy() estimates how full a place is (0–100 %) for a date and time. Below the threshold it counts as quiet and
+   points cost up to `max` % less; medium times get half the discount; busy times full price. */
+const gs = (h, mu, sd) => Math.exp(-((h-mu)**2)/(2*sd*sd));
+const CURVE = {
+  Kultur: h => .18 + .78*gs(h,13,2.4),
+  Natur: h => .14 + .62*gs(h,12,2.8) + .4*gs(h,20.5,1.6),
+  Sosialt: h => .12 + .82*gs(h,20,2.4),
+  Opplevelse: h => .16 + .72*gs(h,15,3),
+};
+const WEEKDAY = [1.25,.78,.72,.8,.92,1.18,1.38]; // søn..lør
+const POP = {fjellheisen:1.15, polaria:1.05, padling:.95};
+function noise(str){ let h = 2166136261; for (const c of str) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return ((h>>>0)%1000)/1000 - .5; }
+const hourOf = t => parseInt(t, 10);
+function busy(a, d, t){
+  const h = hourOf(t); if (isNaN(h)) return 50;
+  const v = CURVE[a.cat](h) * WEEKDAY[d.getDay()] * (POP[a.id]||.9) + noise(a.id+iso(d)+t)*.22;
+  return Math.max(4, Math.min(98, Math.round(v*100)));
+}
+const DEFAULT_OFFPEAK = {on:true, max:40, thr:40};
+const cfgFor = a => a.id===BIZ.id ? S.biz : DEFAULT_OFFPEAK;
+function offpeak(a, d, t){
+  const b = busy(a, d, t), c = cfgFor(a);
+  const lvl = b < c.thr ? 'rolig' : b < c.thr+25 ? 'middels' : 'travelt';
+  const disc = !c.on ? 0 : lvl==='rolig' ? c.max : lvl==='middels' ? Math.round(c.max/2/5)*5 : 0;
+  return {b, lvl, disc};
+}
+const ptsCost = (a, disc) => Math.round(a.redeem*(1-disc/100)/10)*10;
+const LVL_TXT = {rolig:'Rolig', middels:'Middels', travelt:'Travelt'};
+function minCost(a){ let m = a.redeem; bookDates(a).forEach(d => a.times.forEach(t => { m = Math.min(m, ptsCost(a, offpeak(a,d,t).disc)); })); return m; }
+function nextOffpeak(a){
+  const nh = new Date().getHours();
+  for (const t of a.times){ if (isNaN(hourOf(t)) || hourOf(t) < nh) continue; const o = offpeak(a, today, t); if (o.disc>0) return {t, ...o}; }
+  return null;
+}
+function slotLabel(a, d, t){
+  if (isNaN(hourOf(t))) return '';
+  const o = offpeak(a, d, t);
+  return `<small class="lv-${o.lvl}">${a.redeem && o.disc ? '−'+o.disc+' % poeng' : LVL_TXT[o.lvl]}</small>`;
+}
+function offpeakChart(a){
+  const slots = a.times.filter(t => !isNaN(hourOf(t)));
+  const bars = slots.map(t => { const o = offpeak(a, today, t);
+    return `<div class="ob" title="${t}: ${o.b} % belegg"><span class="v ${o.disc?'cost':''}">${pt(ptsCost(a,o.disc))}</span><i class="lv-${o.lvl}" style="height:${Math.round(o.b*.72)}%"></i><small>${t.slice(0,2)}</small></div>`; }).join('');
+  return `<div class="offpeak"><div class="op-head"><b>Poengpris i dag</b><span>${ic('clock')} Billigere når det er rolig</span></div>
+    <div class="obars">${bars}</div>
+    <p class="credit" style="margin:0">Søylene viser beregnet besøk per time, og tallet over viser poengprisen. Når det er rolig, koster det opptil ${cfgFor(a).max} % færre poeng${a.id===BIZ.id ? ', slik bedriften har valgt' : ''}. Beregningen er et anslag i demoen.</p></div>`;
+}
 const kr = n => n.toLocaleString('nb-NO') + ' kr';
 const pt = n => n.toLocaleString('nb-NO');
 const priceTxt = a => a.price===null ? 'Pris på stedet' : a.price===0 ? 'Gratis' : (a.from?'fra ':'') + kr(a.price);
@@ -525,10 +609,16 @@ const LEVELS = [{name:'Bronse',min:0},{name:'Sølv',min:500},{name:'Gull',min:20
 
 /* ---------- state: a made-up test account with demo money ---------- */
 const KEY = 'adventure-point-demo-v2';
+const BIZ = {id:'padling', company:'Nordlys Padling AS', contact:'Ida Testvik', org:'Org.nr. 999 999 999 (fiktivt)'};
+function makeBizBookings(){
+  return [['Kari N.',0,'18:00',2,'kort'],['Jonas B.',0,'20:00',4,'poeng'],['Sara L.',1,'10:00',2,'poeng'],['Martin H.',1,'16:00',1,'kort'],
+    ['Ingrid S.',2,'12:00',3,'kort'],['Ahmed K.',3,'10:00',2,'poeng'],['Linnea O.',-1,'14:00',2,'kort','fullført'],['Ole P.',-1,'18:00',5,'kort','fullført']]
+    .map(([name,dd,time,persons,paid,status],i) => ({bid:'z'+i, actId:'padling', name, date:iso(addDays(dd)), time, persons, paid, status:status||'kommende'}));
+}
 const ACCOUNT = {name:'Thomas Testesen', handle:'@thomas.test', city:'Tromsø', member:'medlem siden mars 2026'};
 function seed(){
   return {
-    points:1015, earned:1015, tickets:9, wallet:2240,
+    points:1015, earned:1015, tickets:9, wallet:2240, mode:'privat', biz:{on:true, max:40, thr:40}, bizBookings:makeBizBookings(),
     bookings:[
       {bid:'b1', actId:'bybowling', date:iso(addDays(1)), time:'19:00', persons:4, paid:'sted', amount:0, status:'kommende'},
       {bid:'b2', actId:'polarmuseet', date:iso(addDays(3)), time:'13:00', persons:2, paid:'lommebok', amount:260, status:'kommende'},
@@ -552,6 +642,7 @@ function seed(){
 }
 let S;
 try { S = JSON.parse(localStorage.getItem(KEY)) || seed(); } catch { S = seed(); }
+{ const fresh = seed(); for (const k of ['mode','biz','bizBookings']) if (S[k] === undefined) S[k] = fresh[k]; }
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
 
 const ui = {tab:'hjem', mapSel:'fjellheisen', mapQ:'', resetArm:false};
@@ -563,12 +654,14 @@ const ptsLabel = a => a.level === 1 ? '<span class="none">Ingen poeng</span>' : 
 function card(a, opts={}){
   const tags = [];
   if (a.isNew) tags.push('<span class="tag new">Ny</span>');
-  if (a.redeem) tags.push(`<span class="tag gold">Bruk ${pt(a.redeem)} p</span>`);
+  const op = a.redeem && nextOffpeak(a);
+  if (a.test) tags.unshift('<span class="tag">Testbedrift</span>');
+  if (a.redeem) tags.push(op ? `<span class="tag open">Rolig kl. ${op.t} · −${op.disc} %</span>` : `<span class="tag gold">Bruk ${pt(a.redeem)} p</span>`);
   if (opts.price) tags.push(`<span class="tag">${priceTxt(a)}</span>`);
   const st = openStatus(a); if (st && st.on) tags.push(`<span class="tag open">${st.txt.split(' · ')[0]}</span>`);
   if (ILLUS.has(a.id)) tags.push('<span class="tag illus">Illustrasjon</span>');
   if (opts.dist) tags.push(`<span class="tag">${kmTxt(a)}</span>`);
-  const right = opts.cost ? `<span>Pris ${pt(a.redeem)} poeng</span>` : ptsLabel(a);
+  const right = opts.cost ? `<span>Fra ${pt(minCost(a))} poeng</span>` : ptsLabel(a);
   return `<button class="card" data-act="open" data-id="${a.id}" aria-label="${esc(a.name)}, ${esc(a.place)}">
     <div class="art" style="--a:${a.a};--b:${a.b}">${photo(a.id)}</div>
     <div class="label"><b>${esc(a.name)}</b><div class="row"><span>${esc(a.place)}</span>${right}</div></div>
@@ -731,7 +824,7 @@ function bookingRow(b){
 
 function vPoints(){
   const L = levelInfo();
-  const rewards = ACTS.filter(a => a.redeem).sort((a,b) => a.redeem-b.redeem);
+  const rewards = ACTS.filter(a => a.redeem).sort((a,b) => minCost(a)-minCost(b));
   const upcoming = S.bookings.filter(b => b.status==='kommende');
   return `
   <div class="balance">
@@ -751,6 +844,8 @@ function vPoints(){
   </section>
   <section class="list">
     <div><h2 class="h1">Her kan du bruke dine poeng!</h2><p class="sub">Finn din neste sosiale aktivitet.</p></div>
+    <div class="offpeak"><div class="op-head"><b>Rolige tider gir færre poeng</b><span>${ic('clock')} Opptil −40 %</span></div>
+      <p class="credit" style="margin:0;font-size:13px">Når et sted har få besøkende, koster det mindre poeng å booke. Du får mer ut av poengene dine, og bedriften fyller plasser som ellers ville stått tomme. Se etter grønne tider når du booker.</p></div>
     ${rewards.map(a => card(a,{cost:true})).join('')}
   </section>
   <section>
@@ -780,6 +875,8 @@ function vProfile(){
     <button data-act="credits">${ic('star')}<span>Bildekreditering<br><small>Fotografer og lisenser fra Wikimedia Commons</small></span>${ic('arrow')}</button>
     <button data-act="reset">${ic('reset')}<span>${ui.resetArm ? 'Trykk igjen for å nullstille' : 'Nullstill testkontoen'}<br><small>Tilbake til 1 015 poeng og 2 240 demo-kr</small></span></button>
   </div>
+  <section class="list"><h2 class="h2">Innstillinger</h2>
+    <div class="menu"><button data-act="mode" data-mode="bedrift">${ic('shop')}<span>Bytt til bedriftskonto<br><small>Logg inn som testbedriften ${BIZ.company}</small></span>${ic('arrow')}</button></div></section>
   <p class="demo-note">Dette er en klikkbar demo av Adventure Point (BED-2015, våren 2022). Stedene, adressene og prisene er ekte og hentet fra visittromso.no i november 2026, så sjekk alltid hos bedriften. Testkontoen, demo-kronene, poengene og partnernivåene er oppdiktet. Ingen av bedriftene er partnere, ingen booking sendes, og alt lagres bare i denne nettleseren.</p>`;
 }
 
@@ -798,6 +895,7 @@ function sDetail(a){
     <div class="facts"><div class="fact"><small>Pris</small><b>${priceTxt(a)}</b></div><div class="fact"><small>Varighet</small><b>${a.dur}</b></div><div class="fact"><small>Poeng</small>${pointsFact}</div></div>
     <p class="desc">${esc(a.desc)}</p>
     <div class="links"><button class="btn ghost" data-act="showMap" data-id="${a.id}">${ic('map')} Vis på kartet</button><a class="btn ghost" href="https://www.google.com/maps/dir/?api=1&destination=${a.lat},${a.lon}" target="_blank" rel="noopener">${ic('arrow')} Veibeskrivelse</a></div>
+    ${a.redeem ? offpeakChart(a) : ''}
     <p class="demo-note" style="margin:0">${esc(a.priceNote)}${a.src ? ` Kilde: <a href="${a.src}" target="_blank" rel="noopener" style="color:var(--sky)">${a.src.replace(/^https:\/\/(www\.)?/,'').split('/')[0]}</a>.` : ''}</p>
     <div class="partner">${ic('shop')}<span>${partner} <i>Partnernivå og poeng er fiktive i demoen.</i></span></div>
     <button class="btn sky block" data-act="book" data-id="${a.id}">${a.price===0 ? 'Legg i planen' : 'Book nå'}</button>
@@ -811,7 +909,10 @@ const defaultPay = a => a.price===0 ? 'gratis' : a.price===null ? 'sted' : 'lomm
 function sBook(){
   const a = byId(draft.actId);
   const dates = bookDates(a);
-  const cash = (a.price||0)*draft.persons, cost = (a.redeem||0)*draft.persons;
+  const d0 = dates[draft.dateIdx] || dates[0];
+  const op = a.redeem && draft.time ? offpeak(a, d0, draft.time) : null;
+  const unitPts = a.redeem ? ptsCost(a, op ? op.disc : 0) : 0;
+  const cash = (a.price||0)*draft.persons, cost = unitPts*draft.persons;
   const canRedeem = a.redeem && S.points >= cost;
   const canWallet = S.wallet >= cash;
   if (draft.paid==='poeng' && !canRedeem) draft.paid = defaultPay(a);
@@ -821,7 +922,7 @@ function sBook(){
   else if (a.price===null) payHtml = `<label><input type="radio" name="pay" value="sted" checked><span>Betal på stedet<small>Kilden oppgir ikke pris. ${earnTxt}.</small></span><b>–</b></label>`;
   else payHtml = `<label class="${canWallet?'':'off'}"><input type="radio" name="pay" value="lommebok" ${draft.paid==='lommebok'?'checked':''} ${canWallet?'':'disabled'}><span>Demo-lommebok<small>${canWallet ? `Saldo ${kr(S.wallet)}. ${earnTxt}.` : `Du mangler ${kr(cash-S.wallet)}.`}</small></span><b>${kr(cash)}</b></label>
       ${canWallet ? '' : `<button class="btn ghost" data-act="topup" data-back="book">Fyll på 1 000 demo-kr</button>`}`;
-  if (a.redeem) payHtml += `<label class="${canRedeem?'':'off'}"><input type="radio" name="pay" value="poeng" ${draft.paid==='poeng'?'checked':''} ${canRedeem?'':'disabled'}><span>Betal med poeng<small>${canRedeem?`Du har ${pt(S.points)} poeng`:`Du mangler ${pt(cost-S.points)} poeng`}</small></span><b class="cost">${pt(cost)} p</b></label>`;
+  if (a.redeem) payHtml += `<label class="${canRedeem?'':'off'}"><input type="radio" name="pay" value="poeng" ${draft.paid==='poeng'?'checked':''} ${canRedeem?'':'disabled'}><span>Betal med poeng<small>${op && op.disc ? `Rolig tid: −${op.disc} % (ellers ${pt(a.redeem*draft.persons)} p). ` : (!draft.time ? 'Velg tid for å se poengprisen. ' : '')}${canRedeem?`Du har ${pt(S.points)} poeng`:`Du mangler ${pt(cost-S.points)} poeng`}</small></span><b class="cost">${pt(cost)} p</b></label>`;
   const totalTxt = draft.paid==='poeng' ? `<span class="cost">${pt(cost)} poeng</span>` : a.price===null ? 'På stedet' : kr(cash);
   const ready = draft.time && (draft.paid!=='lommebok' || canWallet);
   return `<div class="sheet-body" style="padding-top:20px">
@@ -829,9 +930,10 @@ function sBook(){
     <div><div class="f-head" style="margin-bottom:8px">${ic('cal')} Dato</div>
       <div class="slots">${dates.map((d,i)=>`<button class="slot" data-act="date" data-i="${i}" aria-pressed="${draft.dateIdx===i}">${d.toLocaleDateString('nb-NO',{weekday:'short'})}<small>${d.getDate()}. ${d.toLocaleDateString('nb-NO',{month:'short'})}</small></button>`).join('')}</div></div>
     <div><div class="f-head" style="margin-bottom:8px">${ic('clock')} Klokkeslett</div>
-      <div class="slots">${a.times.map(t=>`<button class="slot" data-act="slot" data-t="${t}" aria-pressed="${draft.time===t}">${t}</button>`).join('')}</div></div>
+      <div class="slots">${a.times.map(t=>`<button class="slot" data-act="slot" data-t="${t}" aria-pressed="${draft.time===t}">${t}${slotLabel(a, d0, t)}</button>`).join('')}</div></div>
     <div><div class="f-head" style="margin-bottom:8px">${ic('people')} Antall personer</div>
       <div class="stepper"><button data-act="pminus" aria-label="Færre">−</button><b>${draft.persons}</b><button data-act="pplus" aria-label="Flere">+</button></div></div>
+    ${a.redeem ? `<p class="credit" style="margin:0">${ic('clock').replace('<svg','<svg style="width:13px;height:13px;vertical-align:-2px"')} Poengprisen er lavere når det er få besøkende. Grønne tider gir mest rabatt.</p>` : ''}
     <div class="pay" role="radiogroup" aria-label="Betaling">${payHtml}</div>
     <div class="total"><span>Å betale</span><b>${totalTxt}</b></div>
     <button class="btn sky block" data-act="confirm" ${ready?'':'disabled'}>${!draft.time ? 'Velg et klokkeslett' : ready ? (a.price===0 ? 'Legg i planen' : 'Bekreft booking') : 'Fyll på lommeboka først'}</button>
@@ -843,7 +945,7 @@ function sConfirm(b){
   return `<div class="sheet-body" style="padding-top:24px">
     <div class="big-ok"><div class="ring">${ic('check')}</div><h2 class="h1">Booket!</h2>
       <p class="sub">${esc(a.name)} · ${fmtDay(new Date(b.date+'T00:00'))} kl. ${b.time} · ${b.persons} ${b.persons===1?'person':'personer'}</p>
-      <p class="desc" style="text-align:center">${b.paid==='poeng' ? `Vi har trukket ${pt(a.redeem*b.persons)} poeng. Vis koden din når du kommer.`
+      <p class="desc" style="text-align:center">${b.paid==='poeng' ? `Vi har trukket ${pt(b.pts ?? a.redeem*b.persons)} poeng${b.disc ? ` (${b.disc} % rabatt for rolig tid)` : ''}. Vis koden din når du kommer.`
         : b.paid==='lommebok' ? `Vi har trukket ${kr(b.amount)} fra demo-lommeboka.${a.level>1 ? ` Sjekk inn når du kommer, så får du <b class="cost">${a.earn} poeng</b> og ett lodd.` : ''}`
         : b.paid==='sted' ? `Du betaler hos ${esc(a.name)}. Sjekk inn når du kommer, så får du <b class="cost">${a.earn} poeng</b> og ett lodd.`
         : 'Lagt i planen din. Dette stedet gir ingen poeng.'}</p></div>
@@ -862,7 +964,7 @@ function qrSvg(seedStr){
 }
 function sCheckin(b){
   const a = byId(b.actId);
-  const code = ('AP-' + b.bid.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(-4).padStart(4,'7') + '-' + a.id.slice(0,3).toUpperCase());
+  const code = codeFor(b);
   return `<div class="sheet-top"><button class="x" data-act="close" aria-label="Lukk">${ic('close')}</button></div>
   <div class="sheet-body" style="padding-top:24px">
     <div style="text-align:center"><span class="eyebrow">Innsjekking</span><h2 class="h1" style="margin-top:4px">${esc(a.name)}</h2><p class="sub">Vis koden til de ansatte hos ${esc(a.place)}.</p></div>
@@ -920,6 +1022,126 @@ function updateCalc(){
     `<tr><td>Nivå 1</td><td>0 kr</td></tr><tr><td>Nivå 2 (1 000 kr + 2 %)</td><td>${kr(Math.round(1000+v*.02))}</td></tr><tr><td>Nivå 3 (5 000 kr + 3 %)</td><td>${kr(Math.round(5000+v*.03))}</td></tr>`;
 }
 
+/* ---------- business account ---------- */
+const codeFor = b => 'AP-' + b.bid.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(-4).padStart(4,'7') + '-' + b.actId.slice(0,3).toUpperCase();
+function bizAll(){
+  const own = S.bookings.filter(b => b.actId===BIZ.id).map(b => ({...b, name:ACCOUNT.name, own:true}));
+  return [...S.bizBookings, ...own].sort((x,y) => (x.date+x.time).localeCompare(y.date+y.time));
+}
+function doCheckin(bid){
+  const b = S.bookings.find(x => x.bid===bid);
+  if (b){
+    if (b.status!=='kommende') return 'Allerede sjekket inn';
+    const a = byId(b.actId); b.status = 'fullført';
+    if (b.paid!=='poeng' && a.level>1){ S.points += a.earn; S.earned += a.earn; S.tickets += 1; S.history.push({d:iso(today), text:`${a.name} · ${a.place}`, p:a.earn}); save(); return `+${a.earn} poeng og ett lodd`; }
+    save(); return 'Sjekket inn';
+  }
+  const z = S.bizBookings.find(x => x.bid===bid);
+  if (z){ if (z.status!=='kommende') return 'Allerede sjekket inn'; z.status = 'fullført'; save(); return `${z.name} er sjekket inn`; }
+  return null;
+}
+function bizWeek(){
+  return Array.from({length:7}, (_,i) => addDays(i-6)).map(d => {
+    const tot = Math.max(3, Math.round(5 + 9*WEEKDAY[d.getDay()] + noise('v'+iso(d))*6));
+    const off = Math.round(tot*(.25 + (noise('o'+iso(d))+.5)*.2)) + (S.biz.on ? 0 : -Math.round(tot*.15));
+    return {d, tot, off:Math.max(0, off)};
+  });
+}
+function bizStats(){
+  const a = byId(BIZ.id), wk = bizWeek(), visitors = wk.reduce((x,v) => x+v.tot, 0), off = wk.reduce((x,v) => x+v.off, 0);
+  const live = S.bookings.filter(b => b.actId===BIZ.id);
+  return {visitors: visitors + live.reduce((x,b) => x+b.persons, 0), bookings: Math.round(visitors/2.3) + live.length,
+    revenue: Math.round(visitors*.7)*a.price + live.reduce((x,b) => x+(b.amount||0), 0),
+    ptsIn: Math.round(visitors*.3)*620 + live.reduce((x,b) => x+(b.pts||0), 0), offShare: Math.round(off/visitors*100)};
+}
+function visitChart(){
+  const vals = bizWeek(), max = Math.max(...vals.map(v => v.tot)), H = 110, W = 320, bw = 30, gap = (W - 7*bw)/6;
+  return `<svg viewBox="0 0 ${W} ${H+36}" width="100%" role="img" aria-label="Besøk per dag de siste 7 dagene">
+    ${vals.map((v,i) => { const x = i*(bw+gap), h = v.tot/max*H, ho = v.off/max*H; return `
+      <rect x="${x}" y="${18+H-h}" width="${bw}" height="${Math.max(0,h-ho)}" rx="4" fill="var(--sky)"/>
+      <rect x="${x}" y="${18+H-ho}" width="${bw}" height="${ho}" rx="2" fill="var(--good)"/>
+      <text x="${x+bw/2}" y="${12+H-h}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${v.tot}</text>
+      <text x="${x+bw/2}" y="${H+33}" text-anchor="middle" font-size="11" fill="var(--muted)">${v.d.toLocaleDateString('nb-NO',{weekday:'short'}).replace('.','')}</text>`; }).join('')}
+  </svg>`;
+}
+function bizRow(b){
+  const a = byId(BIZ.id), d = new Date(b.date+'T00:00'), o = offpeak(a, d, b.time);
+  const pay = b.paid==='poeng' ? `<span class="cost">${pt(b.pts ?? ptsCost(a, o.disc)*b.persons)} p${(b.disc ?? o.disc) ? ` · −${b.disc ?? o.disc} %` : ''}</span>` : kr(a.price*b.persons);
+  const right = b.status==='kommende' ? `<button class="btn sky" data-act="bizCheck" data-bid="${b.bid}">Sjekk inn</button>` : '<span class="done-badge">Sjekket inn</span>';
+  return `<div class="bk"><div class="avatar ${b.own ? '' : 'cust-av'}" style="width:42px;height:42px;flex:none">${esc(b.name[0])}</div>
+    <div class="txt"><b>${esc(b.name)}${b.own ? ' <span class="tag" style="background:var(--surface-2)">din testkonto</span>' : ''}</b><small>${fmtDay(d)} kl. ${b.time} · ${b.persons} pers. · ${pay}</small></div>${right}</div>`;
+}
+function vBizHome(){
+  const st = bizStats(), up = bizAll().filter(b => b.status==='kommende').slice(0,3);
+  return `
+  <div class="greet"><div><small>${greeting()},</small><b>${BIZ.contact.split(' ')[0]}</b></div><div class="wx">${esc(BIZ.company)}<br><span class="tag" style="background:var(--surface-2)">Testbedrift</span></div></div>
+  <div><div class="kpis">
+    <div class="fact"><small>Bookinger</small><b>${st.bookings}</b></div>
+    <div class="fact"><small>Besøkende</small><b>${st.visitors}</b></div>
+    <div class="fact"><small>Omsetning</small><b>${kr(st.revenue)}</b></div>
+    <div class="fact"><small>Poeng innløst</small><b class="gold">${pt(st.ptsIn)}</b></div>
+  </div><p class="credit" style="margin-top:6px">Siste 7 dager. Demo-tall pluss bookingene som er gjort med testkontoen.</p></div>
+  <section class="chart-card"><div class="op-head"><b>Besøk per dag</b><span>${ic('clock')} ${st.offShare} % kom i rolige tider</span></div>${visitChart()}
+    <div class="legend"><span><i style="background:var(--good)"></i>Kom i rolig tid</span><span><i style="background:var(--sky)"></i>Øvrige besøk</span></div></section>
+  <section class="list"><div class="results-head"><h2 class="h2">Neste bookinger</h2><button class="chip" data-act="tab" data-tab="bookinger">Se alle</button></div>
+    ${up.map(bizRow).join('') || '<div class="empty">Ingen kommende bookinger.</div>'}</section>
+  <button class="btn sky block" data-act="tab" data-tab="rolig">${ic('clock')} Juster rabatten i rolige tider</button>`;
+}
+function vBizBookings(){
+  const all = bizAll(), up = all.filter(b => b.status==='kommende'), done = all.filter(b => b.status!=='kommende').reverse();
+  return `<div><h1 class="h1">Bookinger</h1><p class="sub">${esc(byId(BIZ.id).name)} · ${up.length} kommende</p></div>
+  <section class="list"><h2 class="h2">Kommende</h2>${up.map(bizRow).join('') || '<div class="empty">Ingen kommende bookinger.</div>'}</section>
+  ${done.length ? `<section class="list"><h2 class="h2">Sjekket inn</h2>${done.map(bizRow).join('')}</section>` : ''}`;
+}
+function vBizRolig(){
+  const c = S.biz;
+  return `<div><h1 class="h1">Rolige tider</h1><p class="sub">Gi kundene rabatt i poeng når du har ledig kapasitet. Du fyller tomme plasser uten å senke prisen i kroner.</p></div>
+  <div class="filters">
+    <label class="toggle"><input type="checkbox" id="bon" ${c.on?'checked':''}> Rabatt i rolige tider er på</label>
+    <div><label class="f-head" for="bmax">${ic('tag')} Rabatt når det er rolig: <span id="bmaxV" style="color:var(--ink)">${c.max} %</span></label><input class="wide" type="range" id="bmax" min="10" max="60" step="5" value="${c.max}"></div>
+    <div><label class="f-head" for="bthr">${ic('people')} Rolig når belegget er under <span id="bthrV" style="color:var(--ink)">${c.thr} %</span></label><input class="wide" type="range" id="bthr" min="20" max="60" step="5" value="${c.thr}"></div>
+    <p class="credit" style="margin:0">Middels travle tider får halv rabatt. Travle tider har full poengpris.</p>
+  </div>
+  <section class="chart-card"><div class="op-head"><b>Neste 7 dager</b><span id="bEffect"></span></div><div id="heat" style="overflow-x:auto"></div>
+    <div class="legend"><span><i style="background:var(--good)"></i>Rolig</span><span><i style="background:var(--gold)"></i>Middels</span><span><i style="background:rgba(255,138,101,.6)"></i>Travelt</span></div></section>
+  <section class="chart-card" id="bPreview"></section>
+  <button class="btn ghost block" data-act="seeCustomer">${ic('user')} Se hvordan kundene ser det</button>`;
+}
+function updateRolig(){
+  const a = byId(BIZ.id), heat = document.getElementById('heat'); if (!heat) return;
+  const days = Array.from({length:7}, (_,i) => addDays(i)); let extra = 0;
+  heat.innerHTML = `<div class="heat" style="grid-template-columns:40px repeat(${a.times.length},minmax(34px,1fr))"><span></span>${a.times.map(t => `<small>${t.slice(0,2)}</small>`).join('')}
+    ${days.map(d => `<small>${d.toLocaleDateString('nb-NO',{weekday:'short'}).replace('.','')}</small>` + a.times.map(t => { const o = offpeak(a, d, t); extra += o.disc/100*1.6;
+      return `<span class="hc lv-${o.lvl}" title="${fmtDay(d)} kl. ${t}: ${o.b} % belegg">${o.disc ? '−'+o.disc : ''}</span>`; }).join('')).join('')}</div>`;
+  document.getElementById('bEffect').textContent = S.biz.on ? `Anslag: +${Math.round(extra)} besøk i uka` : 'Rabatten er slått av';
+  document.getElementById('bmaxV').textContent = S.biz.max + ' %';
+  document.getElementById('bthrV').textContent = S.biz.thr + ' %';
+  let best = null; [today, addDays(1)].forEach(d => a.times.forEach(t => { const o = offpeak(a, d, t); if (!best || o.disc > best.o.disc) best = {d, t, o}; }));
+  document.getElementById('bPreview').innerHTML = `<div class="op-head"><b>Slik ser kundene det</b><span>${best.o.disc ? 'Billigste tid' : ''}</span></div>
+    <div class="bk" style="background:var(--bg)"><div class="art" style="--a:${a.a};--b:${a.b}">${photo(a.id)}</div><div class="txt"><b>${esc(a.name)}</b><small>${fmtDay(best.d)} kl. ${best.t}</small></div>
+    <div style="text-align:right;white-space:nowrap"><b class="cost">${pt(ptsCost(a, best.o.disc))} p</b>${best.o.disc ? `<br><small style="color:var(--muted);text-decoration:line-through">${pt(a.redeem)} p</small>` : ''}</div></div>`;
+}
+function vBizCheckin(){
+  const up = bizAll().filter(b => b.status==='kommende');
+  return `<div><h1 class="h1">Innsjekk</h1><p class="sub">Skann QR-koden til kunden, eller skriv inn koden som står under den.</p></div>
+  <form class="search" id="codeForm" onsubmit="return false">${ic('qr')}<input id="codeIn" placeholder="AP-XXXX-PAD" autocomplete="off" autocapitalize="characters" aria-label="Innsjekkingskode"><button type="button" class="btn sky" style="padding:6px 14px" data-act="bizCode">Sjekk inn</button></form>
+  <p class="demo-note">Prøv det selv: bytt til privatkonto, book «${esc(byId(BIZ.id).name)}», åpne innsjekkingskoden og skriv den inn her. Da får Thomas poengene sine.</p>
+  <section class="list"><h2 class="h2">Venter på innsjekk</h2>${up.map(bizRow).join('') || '<div class="empty">Ingen venter på innsjekk.</div>'}</section>`;
+}
+function vBizKonto(){
+  const st = bizStats(), pct = Math.round(st.revenue*.03);
+  return `<div class="prof"><div class="avatar biz-av" style="width:58px;height:58px;font-size:20px">NP</div><div><h1 class="h1">${esc(BIZ.company)}</h1><p class="sub">${esc(BIZ.org)} · Kontakt: ${esc(BIZ.contact)}</p><span class="tag" style="display:inline-block;margin-top:6px;background:var(--surface-2)">Testbedrift</span></div></div>
+  <div class="tier hl"><div class="t-top"><b>Partnernivå 3</b><span>5 000 kr + 3 %</span></div><p>Kundene både tjener og bruker poeng hos deg, og du styrer rabatten i rolige tider.</p></div>
+  <section class="chart-card"><div class="op-head"><b>Estimert faktura denne perioden</b></div>
+    <table class="calc-table"><tbody><tr><td>Fast avgift</td><td>5 000 kr</td></tr><tr><td>3 % av ${kr(st.revenue)} omsetning via appen</td><td>${kr(pct)}</td></tr><tr><td><b>Totalt</b></td><td>${kr(5000+pct)}</td></tr></tbody></table>
+    <p class="credit" style="margin:0">Poeng som kundene bruker hos deg, dekkes av Adventure Point gjennom partneravgiftene. Du får betalt for besøket som vanlig.</p></section>
+  <section class="list"><h2 class="h2">Innstillinger</h2><div class="menu">
+    <button data-act="biz">${ic('shop')}<span>Partnernivåer og priser<br><small>Sammenlign nivå 1, 2 og 3</small></span>${ic('arrow')}</button>
+    <button data-act="mode" data-mode="privat">${ic('user')}<span>Bytt til privatkonto<br><small>Tilbake til ${esc(ACCOUNT.name)}</small></span>${ic('arrow')}</button>
+  </div></section>
+  <p class="demo-note">Nordlys Padling AS er en oppdiktet testbedrift, og tallene på oversikten er demo-tall. Innstillingene for rolige tider gjelder turen deres i kundeappen.</p>`;
+}
+
 /* ---------- install (PWA) ---------- */
 let installEvt = null;
 const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -927,22 +1149,30 @@ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instal
 
 /* ---------- render ---------- */
 const TABS = [['hjem','Hjem','home'],['utforsk','Utforsk','compass'],['kart','Kart','map'],['poeng','Poeng','gift'],['profil','Profil','user']];
+const BIZ_TABS = [['oversikt','Oversikt','home'],['bookinger','Bookinger','cal'],['rolig','Rolige tider','clock'],['innsjekk','Innsjekk','qr'],['konto','Konto','shop']];
+const tabsFor = () => S.mode==='bedrift' ? BIZ_TABS : TABS;
+const VIEWS = {hjem:vHome, utforsk:vExplore, kart:vMap, poeng:vPoints, profil:vProfile,
+  oversikt:vBizHome, bookinger:vBizBookings, rolig:vBizRolig, innsjekk:vBizCheckin, konto:vBizKonto};
 function render(){
-  document.getElementById('ptsTop').textContent = pt(S.points);
-  document.getElementById('tabs').innerHTML = TABS.map(([k,l,i]) => `<button data-act="tab" data-tab="${k}" ${ui.tab===k?'aria-current="page"':''}>${ic(i)}${l}</button>`).join('');
+  const biz = S.mode==='bedrift';
+  document.getElementById('topRight').innerHTML = biz
+    ? `<span class="pts-pill">${ic('shop')} Bedriftskonto</span><button class="avatar biz-av" data-act="tab" data-tab="konto" aria-label="Bedriftskonto">NP</button>`
+    : `<button class="pts-pill" data-act="tab" data-tab="poeng" aria-label="Dine poeng"><span class="coin"></span><span id="ptsTop">${pt(S.points)}</span> poeng</button><button class="avatar" data-act="tab" data-tab="profil" aria-label="Profil">T</button>`;
+  document.getElementById('tabs').innerHTML = tabsFor().map(([k,l,i]) => `<button data-act="tab" data-tab="${k}" ${ui.tab===k?'aria-current="page"':''}>${ic(i)}${l}</button>`).join('');
   const v = document.getElementById('view');
   if (MAP){ MAP.remove(); MAP = null; }
-  v.innerHTML = {hjem:vHome, utforsk:vExplore, kart:vMap, poeng:vPoints, profil:vProfile}[ui.tab]();
+  v.innerHTML = VIEWS[ui.tab]();
   if (ui.tab==='utforsk') updateResults();
   if (ui.tab==='kart') initMap();
+  if (ui.tab==='rolig') updateRolig();
 }
-const TAB_KEYS = TABS.map(t => t[0]);
 function go(tab, fromHash){
-  if (!TAB_KEYS.includes(tab)) tab = 'hjem';
+  const keys = tabsFor().map(t => t[0]);
+  if (!keys.includes(tab)) tab = keys[0];
   ui.tab = tab; ui.resetArm = false; closeSheet(); render(); document.getElementById('view').scrollTop = 0;
   if (!fromHash && location.hash !== '#'+tab) { try { history.pushState(null, '', '#'+tab); } catch {} }
 }
-window.addEventListener('popstate', () => go((location.hash||'#hjem').slice(1), true));
+window.addEventListener('popstate', () => go((location.hash||'#').slice(1), true));
 
 function openSheet(html){
   const root = document.getElementById('sheetRoot');
@@ -991,24 +1221,31 @@ document.addEventListener('click', e => {
       const a = byId(draft.actId);
       const d = bookDates(a)[draft.dateIdx];
       const b = {bid:'b'+Date.now().toString(36), actId:a.id, date:iso(d), time:draft.time, persons:draft.persons, paid:draft.paid, amount:0, status:'kommende'};
-      if (b.paid==='poeng'){ const cost = a.redeem*b.persons; S.points -= cost; S.history.push({d:iso(today), text:`${a.name} · betalt med poeng`, p:-cost}); }
+      if (b.paid==='poeng'){ const o = offpeak(a, d, b.time); b.disc = o.disc; b.pts = ptsCost(a, o.disc)*b.persons; if (b.pts > S.points) break;
+        S.points -= b.pts; S.history.push({d:iso(today), text:`${a.name} · betalt med poeng${o.disc ? ` (−${o.disc} % rolig tid)` : ''}`, p:-b.pts}); }
       if (b.paid==='lommebok'){ b.amount = a.price*b.persons; if (b.amount > S.wallet) break; S.wallet -= b.amount; S.tx.push({d:iso(today), text:`${a.name} · ${b.persons} ${b.persons===1?'person':'personer'}`, k:-b.amount}); }
       S.bookings.push(b); save(); render(); openSheet(sConfirm(b)); break; }
     case 'checkin': { const b = S.bookings.find(x => x.bid===t.dataset.bid); if (b) openSheet(sCheckin(b)); break; }
     case 'scanned': {
-      const b = S.bookings.find(x => x.bid===t.dataset.bid); if (!b || b.status!=='kommende') { closeSheet(); break; }
-      const a = byId(b.actId); b.status = 'fullført';
-      let msg = 'Sjekket inn';
-      if (b.paid!=='poeng' && a.level>1){ S.points += a.earn; S.earned += a.earn; S.tickets += 1; S.history.push({d:iso(today), text:`${a.name} · ${a.place}`, p:a.earn}); msg = `+${a.earn} poeng og ett lodd`; }
-      save(); closeSheet(); render(); toast(msg, true); break; }
+      const msg = doCheckin(t.dataset.bid); closeSheet(); render(); toast(msg || 'Fant ikke bookingen', true); break; }
     case 'topup':
       S.wallet += 1000; S.tx.push({d:iso(today), text:'Påfylling av demo-kroner', k:1000}); save();
       if (t.dataset.back==='book' && draft) openSheet(sBook()); else render();
-      document.getElementById('ptsTop').textContent = pt(S.points);
+      { const pe = document.getElementById('ptsTop'); if (pe) pe.textContent = pt(S.points); }
       toast('+1 000 demo-kr'); break;
     case 'contest': openSheet(sContest()); break;
     case 'credits': openSheet(sCredits()); break;
     case 'biz': openSheet(sBiz()); break;
+    case 'mode':
+      S.mode = t.dataset.mode; save(); go(S.mode==='bedrift' ? 'oversikt' : 'profil');
+      toast(S.mode==='bedrift' ? `Logget inn som ${BIZ.company}` : `Tilbake som ${ACCOUNT.name}`); break;
+    case 'seeCustomer': S.mode = 'privat'; save(); go('hjem'); openSheet(sDetail(byId(BIZ.id))); break;
+    case 'bizCheck': case 'bizCode': {
+      const all = bizAll();
+      const b = act==='bizCheck' ? all.find(x => x.bid===t.dataset.bid) : all.find(x => codeFor(x)===(document.getElementById('codeIn').value||'').trim().toUpperCase());
+      if (!b){ toast('Fant ingen kommende booking med den koden'); break; }
+      const msg = doCheckin(b.bid); render();
+      toast(b.own && /poeng/.test(msg) ? `Sjekket inn. Thomas fikk ${byId(BIZ.id).earn} poeng` : b.own ? msg : msg, true); break; }
     case 'reset':
       if (!ui.resetArm){ ui.resetArm = true; render(); break; }
       S = seed(); save(); ui.resetArm = false; render(); toast('Demoen er nullstilt'); break;
@@ -1022,7 +1259,9 @@ document.addEventListener('submit', e => {
 });
 document.addEventListener('input', e => {
   const id = e.target.id;
-  if (id==='fq'){ F.q = e.target.value; updateResults(); }
+  if (id==='bmax'){ S.biz.max = +e.target.value; save(); updateRolig(); }
+  else if (id==='bthr'){ S.biz.thr = +e.target.value; save(); updateRolig(); }
+  else if (id==='fq'){ F.q = e.target.value; updateResults(); }
   else if (id==='fmin'){ F.min = Math.min(+e.target.value, F.max); e.target.value = F.min; updateResults(); }
   else if (id==='fmax'){ F.max = Math.max(+e.target.value, F.min); e.target.value = F.max; updateResults(); }
   else if (id==='mq'){ ui.mapQ = e.target.value; updateMap(); }
@@ -1030,7 +1269,8 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const id = e.target.id;
-  if (id==='fdate'){ F.date = e.target.value; updateResults(); }
+  if (id==='bon'){ S.biz.on = e.target.checked; save(); updateRolig(); }
+  else if (id==='fdate'){ F.date = e.target.value; updateResults(); }
   else if (id==='ftime'){ F.time = e.target.value; updateResults(); }
   else if (id==='fpers'){ F.persons = +e.target.value; updateResults(); }
   else if (id==='fred'){ F.onlyRedeem = e.target.checked; updateResults(); }
@@ -1039,7 +1279,7 @@ document.addEventListener('change', e => {
   else if (e.target.name==='pay'){ draft.paid = e.target.value; openSheet(sBook()); }
 });
 
-ui.tab = TAB_KEYS.includes((location.hash||'').slice(1)) ? location.hash.slice(1) : 'hjem';
+{ const k = tabsFor().map(t => t[0]), h = (location.hash||'').slice(1); ui.tab = k.includes(h) ? h : k[0]; }
 render();
 try { const qr = document.getElementById('qr'); if (qr && window.QRCode && /^https?:/.test(location.href))
   new QRCode(qr, {text: location.href.split('#')[0], width:96, height:96, colorDark:'#0d1830', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M});
